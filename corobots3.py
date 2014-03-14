@@ -14,6 +14,7 @@ from pomcp import *
 import numpy as NP
 import threading
 import time
+import sys
 
 #simple threading class so we can do two things at once
 class myThread (threading.Thread):
@@ -134,7 +135,7 @@ class CoRobot(object):
         self.N=1000
         self.rough = self.N**(-1.0/3.0)
         self.dyn_noise=0.1
-        self.obs_noise=0.5
+        self.obs_noise=0.1
         self.id_noise=0.1
         self.id_obs_noise=1.0
         self.discount_factor=0.9
