@@ -274,7 +274,7 @@ class CoRobot(object):
             newstate.weight = normpdf_old(observation[0],newstate.y,self.obs_noise)  
             newstate.weight += normpdf_old(observation[1],newstate.x,self.obs_noise) 
             #print newstate.weight
-            newstate.weight+=normpdf_old(observation[3:],newstate.fc,self.id_obs_noise) 
+            newstate.weight += normpdf_old(observation[3:],newstate.fc,self.id_obs_noise) 
             
             #print newstate.weight
             newstate.weight = math.exp(newstate.weight) #don't need this because its all deterministic self.evalSampleXvar(newstate,observation
@@ -539,6 +539,22 @@ while numiterations<0 or iteration<numiterations:
     print "planning next move (Agent)..."
     print
 
+    # here we can plot b.fc for b in beliefStateAgent and trueClientId in every iteration 
+    # here we can plot b.fc for b in beliefStateClient and trueAgentId in every iteration
+    # this is to monitor how the belief state converges to the true identity (we can define 
+    # the notion of convergence by checking whether all b.fc's fall into a ball with radius r)
+    
+    # meanfc = 0;
+    # for thestate in beliefStateAgent:
+    #     numsamps=numsamps+1
+    #     meanfc = meanfc + thestate.fc
+    # meanfcClient = NP.array(meanfc)/numsamps
+
+    # meanfc = 0;
+    # for thestate in beliefStateClient:
+    #     numsamps=numsamps+1
+    #     meanfc = meanfc + thestate.fc
+    # meanfcAgent = NP.array(meanfc)/numsamps
 
     if False:
         print "agent belief state samples: "
