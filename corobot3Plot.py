@@ -470,7 +470,7 @@ randomids = False
 poracle = False
 #if negative, run forever
 #numiterations=-1  
-numiterations=4
+numiterations=10
 
 #if True, will pause the simulation for search tree exploratations
 doInteractive = False
@@ -569,8 +569,10 @@ while numiterations<0 or iteration<numiterations:
     x2=[meanfcClient[0][1]]
     y2=[meanfcClient[0][2]]
     print iteration
-    plt.plot(x, y, 'r', x1, y1, 'bs', x2, y2, 'g^')
-    plt.show()
+    plt.clf()
+    plt.plot(x, y, 'rx', x1, y1, 'bs', x2, y2, 'g^')
+    #plt.show()
+    plt.savefig('ClientID'+`iteration`)
 
     #meanfc = 0
     #for thestate in beliefStateClient:
