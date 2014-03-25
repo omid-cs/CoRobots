@@ -11,12 +11,13 @@ Research sponsored by the Natural Sciences and Engineering Council of Canada (NS
 see README for details
 ----------------------------------------------------------------------------------------------"""
 from pomcp import *
+from plotter import *
 #from plotter import *
 import numpy as NP
 import threading
 import time
 import sys
-import matplotlib.pyplot as plt
+
 #simple threading class so we can do two things at once
 class myThread (threading.Thread):
     def __init__(self, threadID, name, tAgent):
@@ -552,27 +553,28 @@ while numiterations<0 or iteration<numiterations:
         numsamps=numsamps+1
         meanfc = meanfc + thestate.fc
     meanfcClient = NP.array(meanfc)/numsamps
-    #plotter(beliefStateAgent, trueClientId, meanfc)
     x = []
     y = []
     for b in beliefStateAgent:
-        #temp=b.fc+[0,0,0]
         x.append(b.fc[1])
         y.append(b.fc[2])
-    #t = np.arange(0., 5., 0.2)
-    # red dashes, blue squares and green triangles
-    #print x
-    #print y
-    x1=[trueClientId[1]]
-    y1=[trueClientId[2]]
-    print meanfc
-    x2=[meanfcClient[0][1]]
-    y2=[meanfcClient[0][2]]
-    print iteration
-    plt.clf()
-    plt.plot(x, y, 'rx', x1, y1, 'bs', x2, y2, 'g^')
-    #plt.show()
-    plt.savefig('ClientID'+`iteration`)
+
+    plotBeliefStates(zip(x,y),trueClientId,meanfcClient[0],'Client',iteration)
+
+    meanfc = 0
+    numsamps=0
+    meanfc=NP.zeros((1,3))
+    for thestate in beliefStateClient:
+        numsamps=numsamps+1
+        meanfc = meanfc + thestate.fc
+    meanfcAgent = NP.array(meanfc)/numsamps
+    x = []
+    y = []
+    for b in beliefStateClient:
+        x.append(b.fc[1])
+        y.append(b.fc[2])
+
+    plotBeliefStates(zip(x,y),trueAgentId,meanfcAgent[0],'Agent',iteration)
 
     #meanfc = 0
     #for thestate in beliefStateClient:
