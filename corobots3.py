@@ -11,6 +11,8 @@ Research sponsored by the Natural Sciences and Engineering Council of Canada (NS
 see README for details
 ----------------------------------------------------------------------------------------------"""
 from pomcp import *
+from plotter import *
+
 import numpy as NP
 import threading
 import time
@@ -131,6 +133,8 @@ class CoRobot(object):
         #only used in cases where a perfect oracle is used for testing purposes
         self.clientidentity = kwargs.get("clientidentity",[0,0,0])  #E-P-A
 
+        self.rewardFlag=kwargs.get("rFlag",False)
+
         self.rewsigma=2.5
         self.N=1000
         self.rough = self.N**(-1.0/3.0)
@@ -250,13 +254,15 @@ class CoRobot(object):
                 state.turn=0
         
         newreward=0.0
-        if abs(state.x-state.y)<1.0:  #agents are close enough
+        if abs(state.x-state.y)<1.0 or self.rewardFlag:  #agents are close enough
             if self.identity[0] > 0:
                 newreward = (10.0*math.exp(-((state.y-self.goalstate)/self.rewsigma)**2.0)
                              + 3.0*math.exp(-((state.y+self.goalstate)/self.rewsigma)**2.0))
             else:
                 newreward = (10.0*math.exp(-((state.y+self.goalstate)/self.rewsigma)**2.0)
                              + 3.0*math.exp(-((state.y-self.goalstate)/self.rewsigma)**2.0))
+        if self.rewardFlag:
+            newreward = newreward*math.exp(-(state.x-state.y)**2.0)
         
         newfc = state.fc + NP.random.normal(0,self.id_noise,3)
         newfcobs = state.fc + NP.random.normal(0,self.id_obs_noise,3)
@@ -469,7 +475,7 @@ randomids = False
 poracle = False
 #if negative, run forever
 #numiterations=-1  
-numiterations=4
+numiterations=50
 
 #if True, will pause the simulation for search tree exploratations
 doInteractive = False
@@ -511,7 +517,7 @@ if randomids:
 print "client id: ",trueClientId
 print "agent id:  ",trueAgentId
     
-
+rewardFlag = True
 
 
 totalreward=0.0
@@ -519,15 +525,18 @@ totalreward=0.0
 iteration=0
 
 #true client id is passed to each agent, but only used by the oracle when poracle is true for tests/comparisons
-testAgent = CoRobot(goal=trueGoal,x=trueX,identity=trueAgentId,clientidentity=trueClientId,turn=trueAgentTurn,timeout=pomcptimeout,obsres=obsres,actres=actres,numcact=numcact,oraclesig=osig,poracle=poracle)
+testAgent = CoRobot(goal=trueGoal,x=trueX,identity=trueAgentId,clientidentity=trueClientId,turn=trueAgentTurn,timeout=pomcptimeout,obsres=obsres,actres=actres,numcact=numcact,oraclesig=osig,poracle=poracle,rFlag=rewardFlag)
 
-testClient = CoRobot(goal=trueGoal,x=trueX,identity=trueClientId,clientidentity=trueAgentId,turn=trueClientTurn,timeout=pomcptimeout,obsres=obsres,actres=actres,numcact=numcact,oraclesig=osig,poracle=poracle)
+testClient = CoRobot(goal=trueGoal,x=trueX,identity=trueClientId,clientidentity=trueAgentId,turn=trueClientTurn,timeout=pomcptimeout,obsres=obsres,actres=actres,numcact=numcact,oraclesig=osig,poracle=poracle,rFlag=rewardFlag)
 
 beliefStateAgent = testAgent.initialise()
 beliefStateClient = testClient.initialise()
 
 testAgent.printParams()
 testClient.printParams()
+
+trueAgentLocations = []
+trueClientLocations = []
 
 
 
@@ -544,17 +553,43 @@ while numiterations<0 or iteration<numiterations:
     # this is to monitor how the belief state converges to the true identity (we can define 
     # the notion of convergence by checking whether all b.fc's fall into a ball with radius r)
     
-    # meanfc = 0;
-    # for thestate in beliefStateAgent:
-    #     numsamps=numsamps+1
-    #     meanfc = meanfc + thestate.fc
-    # meanfcClient = NP.array(meanfc)/numsamps
+    meanfc = 0
+    numsamps=0
+    meanfc=NP.zeros((1,3))
+    for thestate in beliefStateAgent:
+        numsamps=numsamps+1
+        meanfc = meanfc + thestate.fc
+    meanfcClient = NP.array(meanfc)/numsamps
+    x = []
+    y = []
+    for b in beliefStateAgent:
+        x.append(b.fc[1])
+        y.append(b.fc[2])
 
-    # meanfc = 0;
-    # for thestate in beliefStateClient:
-    #     numsamps=numsamps+1
-    #     meanfc = meanfc + thestate.fc
-    # meanfcAgent = NP.array(meanfc)/numsamps
+    plotBeliefStates(zip(x,y),trueClientId,meanfcClient[0],'Client3-',iteration)
+
+    meanfc = 0
+    numsamps=0
+    meanfc=NP.zeros((1,3))
+    for thestate in beliefStateClient:
+        numsamps=numsamps+1
+        meanfc = meanfc + thestate.fc
+    meanfcAgent = NP.array(meanfc)/numsamps
+    x = []
+    y = []
+    for b in beliefStateClient:
+        x.append(b.fc[1])
+        y.append(b.fc[2])
+
+    plotBeliefStates(zip(x,y),trueAgentId,meanfcAgent[0],'Agent3-',iteration)
+
+    #meanfc = 0
+    #for thestate in beliefStateClient:
+    #    numsamps=numsamps+1
+    #    meanfc = meanfc + thestate.fc
+    #meanfcAgent = NP.array(meanfc)/numsamps
+
+
 
     if False:
         print "agent belief state samples: "
@@ -609,6 +644,9 @@ while numiterations<0 or iteration<numiterations:
     trueY = trueY + yaction  + NP.random.normal(0,trueDynNoise,1)
     trueX = trueX + xaction  + NP.random.normal(0,trueDynNoise,1)
 
+    trueAgentLocations.append(trueX)
+    trueClientLocations.append(trueY)
+
     trueYobs = trueY + NP.random.normal(0,trueObsNoise,1)
     trueXobs = trueX + NP.random.normal(0,trueObsNoise,1)
 
@@ -641,7 +679,7 @@ while numiterations<0 or iteration<numiterations:
     xngoaldist=math.exp(-((trueX+trueGoal)/trueRewSigma)**2.0)
     
 
-    if abs(trueY-trueX)<1.0:
+    if abs(trueY-trueX)<1.0 or rewardFlag:
         if trueClientId[0]>0:
             newreward = newreward + 10.0*xpgoaldist
             newreward = newreward + 3.0*xngoaldist
@@ -655,6 +693,11 @@ while numiterations<0 or iteration<numiterations:
         else:
             newreward = newreward + 3.0*ypgoaldist
             newreward = newreward + 10.0*yngoaldist
+    
+    if rewardFlag:
+        #newreward = newreward/(abs(trueY-trueX))
+        newreward = newreward*math.exp(-(trueY-trueX)**2.0)
+
 
     if doInteractive:
         askq=raw_input("I'm about to update the belief states and prune the tree, but maybe you want to interactively explore the tree? (enter means no, anything else is yes):")
@@ -704,5 +747,6 @@ while numiterations<0 or iteration<numiterations:
     iteration=iteration+1
 
 print "final reward obtained (in ",iteration," iterations): ",totalreward
+plotRobotsLocation(trueAgentLocations,trueClientLocations,trueGoal,numiterations)
 
     

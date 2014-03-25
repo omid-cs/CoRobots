@@ -11,6 +11,8 @@ Research sponsored by the Natural Sciences and Engineering Council of Canada (NS
 see README for details
 ----------------------------------------------------------------------------------------------"""
 from pomcp import *
+from plotter import *
+
 import numpy as NP
 import threading
 import time
@@ -571,7 +573,7 @@ agent_osigbeh=1.0
 cbehnoise=0.5  #same as osigbeh by default - this used to be 0.1 but now I think it should be the same as osigbeh
 randomids = False
 #if negative, run forever
-numiterations=-1  
+numiterations=15  
 
 #if True, will pause the simulation for search tree exploratations
 doInteractive = False
@@ -655,7 +657,8 @@ beliefStateClient = testClient.initialise()
 testAgent.printParams()
 testClient.printParams()
 
-
+trueAgentLocations = []
+trueClientLocations = []
 
 while numiterations<0 or iteration<numiterations:
     
@@ -665,6 +668,35 @@ while numiterations<0 or iteration<numiterations:
     print "planning next move (Agent)..."
     print
 
+    meanfc = 0
+    numsamps=0
+    meanfc=NP.zeros((1,3))
+    for thestate in beliefStateAgent:
+        numsamps=numsamps+1
+        meanfc = meanfc + thestate.fc
+    meanfcClient = NP.array(meanfc)/numsamps
+    x = []
+    y = []
+    for b in beliefStateAgent:
+        x.append(b.fc[1])
+        y.append(b.fc[2])
+
+    plotBeliefStates(zip(x,y),trueClientId,meanfcClient[0],'Client5-',iteration)
+
+    meanfc = 0
+    numsamps=0
+    meanfc=NP.zeros((1,3))
+    for thestate in beliefStateClient:
+        numsamps=numsamps+1
+        meanfc = meanfc + thestate.fc
+    meanfcAgent = NP.array(meanfc)/numsamps
+    x = []
+    y = []
+    for b in beliefStateClient:
+        x.append(b.fc[1])
+        y.append(b.fc[2])
+
+    plotBeliefStates(zip(x,y),trueAgentId,meanfcAgent[0],'Agent5-',iteration)
 
     if False:
         print "agent belief state samples: "
@@ -718,6 +750,9 @@ while numiterations<0 or iteration<numiterations:
     
     trueY = trueY + yaction  + NP.random.normal(0,trueDynNoise,1)
     trueX = trueX + xaction  + NP.random.normal(0,trueDynNoise,1)
+
+    trueAgentLocations.append(trueX)
+    trueClientLocations.append(trueY)
 
     trueYobs = trueY + NP.random.normal(0,trueObsNoise,1)
     trueXobs = trueX + NP.random.normal(0,trueObsNoise,1)
@@ -812,5 +847,6 @@ while numiterations<0 or iteration<numiterations:
     iteration=iteration+1
 
 print "final reward obtained (in ",iteration," iterations): ",totalreward
+plotRobotsLocation(trueAgentLocations,trueClientLocations,trueGoal,numiterations)
 
     
