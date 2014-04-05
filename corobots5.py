@@ -672,6 +672,36 @@ while numiterations<0 or iteration<numiterations:
     print "planning next move (Agent)..."
     print
 
+    meanfc = 0
+    numsamps=0
+    meanfc=NP.zeros((1,3))
+    for thestate in beliefStateAgent:
+        numsamps=numsamps+1
+        meanfc = meanfc + thestate.fc
+    meanfcClient = NP.array(meanfc)/numsamps
+    x = []
+    y = []
+    for b in beliefStateAgent:
+        x.append(b.fc[1])
+        y.append(b.fc[2])
+
+    plotBeliefStates(zip(x,y),trueClientId,meanfcClient[0],'Client5-',iteration)
+
+    meanfc = 0
+    numsamps=0
+    meanfc=NP.zeros((1,3))
+    for thestate in beliefStateClient:
+        numsamps=numsamps+1
+        meanfc = meanfc + thestate.fc
+    meanfcAgent = NP.array(meanfc)/numsamps
+    x = []
+    y = []
+    for b in beliefStateClient:
+        x.append(b.fc[1])
+        y.append(b.fc[2])
+
+    plotBeliefStates(zip(x,y),trueAgentId,meanfcAgent[0],'Agent5-',iteration)
+
 
     if False:
         print "agent belief state samples: "
@@ -819,5 +849,4 @@ while numiterations<0 or iteration<numiterations:
     iteration=iteration+1
 
 print "final reward obtained (in ",iteration," iterations): ",totalreward
-
-    
+plotRobotsLocation(trueAgentLocations,trueClientLocations,trueGoal,numiterations)
