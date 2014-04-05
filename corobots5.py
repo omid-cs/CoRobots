@@ -547,7 +547,8 @@ trueX = 0.0
 
 trueDynNoise = 0.1
 trueObsNoise = 0.1
-behObsNoise = 0.1
+#behObsNoise = 0.1
+behObsNoise = 0.001 #CIB
 trueIdObsNoise = 0.1
 
 trueGoal = 10.0
@@ -555,18 +556,24 @@ trueRewSigma = 2.5
 
 obsres = 2.0
 actres = 1.0
-numcact = 25
-agent_numcact = 25   #possibly increase for a manipulative agent
+#numcact = 25
+numcact = 50 		#CIB
+#agent_numcact = 25   #possibly increase for a manipulative agent
+agent_numcact = 50  #CIB
 
-pomcptimeout=20.0 
-agent_pomcptimeout=100.0  #increase for manipulative agent
+#pomcptimeout=20.0
+pomcptimeout=200.0 	#CIB
+#agent_pomcptimeout=100.0  #increase for manipulative agent
+agent_pomcptimeout=200.0 #CIB
 
 osig=1.0
 
 #increase this for a manipulative agent
-osigbeh=0.5
+#osigbeh=0.5
+osigbeh=0.01 		#CIB
 #default is that we have the same osigbeh, but a manipulative agent will have a higher value - also should correpondingly increase the pomcp numcact and the pomcp timeout (see above)
-agent_osigbeh=1.0  
+#agent_osigbeh=1.0  
+agent_osigbeh=0.01  #CIB
 
 cbehnoise=0.5  #same as osigbeh by default - this used to be 0.1 but now I think it should be the same as osigbeh
 randomids = False
