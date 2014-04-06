@@ -14,6 +14,7 @@ from pomcp import *
 import numpy as NP
 import threading
 import time
+from plotter import *
 
 #simple threading class so we can do two things at once
 class myThread (threading.Thread):
@@ -340,8 +341,12 @@ class CoRobot(object):
                 newreward = (10.0*math.exp(-((state.y+self.goalstate)/self.rewsigma)**2.0)
                              + 3.0*math.exp(-((state.y-self.goalstate)/self.rewsigma)**2.0))
         
+        #update newfc based on newfa and newfbobs
+
         newfa = state.fa + NP.random.normal(0,self.self_id_noise,3)
-        newfc = state.fc + NP.random.normal(0,self.id_noise,3)
+        # CIB newfc = state.fc + NP.random.normal(0,self.id_noise,3)
+        newfc = (state.fc+NP.random.normal(0,self.self_id_noise,3))*(2*newfbobs+state.fa+NP.random.normal(0, 0.1, 3))
+        # NP.multiply((state.fc+NP.random.normal(0,self.self_id_noise,3)),(2*NP.array(newfbobs)+NP.array(state.fa)+NP.random.normal(0, 0.1, 3))) 
         newfcobs = state.fc + NP.random.normal(0,self.id_obs_noise,3)
         return (State(newfa,newfbsample,newfc,newy,newx,state.turn,state.weight),
                 (newyobs,newxobs,newturnobs,newfbobs[0],newfbobs[1],newfbobs[2]),newreward)
@@ -557,20 +562,20 @@ trueRewSigma = 2.5
 obsres = 2.0
 actres = 1.0
 #numcact = 25
-numcact = 50 		#CIB
+numcact = 50        #CIB
 #agent_numcact = 25   #possibly increase for a manipulative agent
 agent_numcact = 50  #CIB
 
 #pomcptimeout=20.0
-pomcptimeout=200.0 	#CIB
+pomcptimeout=20.0  #CIB
 #agent_pomcptimeout=100.0  #increase for manipulative agent
-agent_pomcptimeout=200.0 #CIB
+agent_pomcptimeout=20.0 #CIB
 
 osig=1.0
 
 #increase this for a manipulative agent
 #osigbeh=0.5
-osigbeh=0.01 		#CIB
+osigbeh=0.01        #CIB
 #default is that we have the same osigbeh, but a manipulative agent will have a higher value - also should correpondingly increase the pomcp numcact and the pomcp timeout (see above)
 #agent_osigbeh=1.0  
 agent_osigbeh=0.01  #CIB
