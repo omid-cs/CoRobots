@@ -345,8 +345,11 @@ class CoRobot(object):
 
         newfa = state.fa + NP.random.normal(0,self.self_id_noise,3)
         # CIB newfc = state.fc + NP.random.normal(0,self.id_noise,3)
-        newfc = (state.fc+NP.random.normal(0,self.self_id_noise,3))*(2*newfbobs+state.fa+NP.random.normal(0, 0.1, 3))
-        # NP.multiply((state.fc+NP.random.normal(0,self.self_id_noise,3)),(2*NP.array(newfbobs)+NP.array(state.fa)+NP.random.normal(0, 0.1, 3))) 
+        alpha = 0.3
+        sigmaIDtran = 0.1
+        newfc = state.fc + alpha*(2*newfbobs - state.fa - state.fc) + NP.random.normal(0,sigmaIDtran,3)
+        
+        # TRIED NP.multiply((state.fc+NP.random.normal(0,self.self_id_noise,3)),(2*NP.array(newfbobs)+NP.array(state.fa)+NP.random.normal(0, 0.1, 3))) 
         newfcobs = state.fc + NP.random.normal(0,self.id_obs_noise,3)
         return (State(newfa,newfbsample,newfc,newy,newx,state.turn,state.weight),
                 (newyobs,newxobs,newturnobs,newfbobs[0],newfbobs[1],newfbobs[2]),newreward)
