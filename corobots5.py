@@ -580,7 +580,7 @@ osigbeh=0.01        #CIB
 #agent_osigbeh=1.0  
 agent_osigbeh=0.01  #CIB
 
-cbehnoise=0.5  #same as osigbeh by default - this used to be 0.1 but now I think it should be the same as osigbeh
+cbehnoise=0.01  #same as osigbeh by default - this used to be 0.1 but now I think it should be the same as osigbeh
 randomids = False
 #if negative, run forever
 numiterations=-1  
