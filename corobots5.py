@@ -344,15 +344,17 @@ class CoRobot(object):
         #update newfc based on newfa and newfbobs
 
         newfa = state.fa + NP.random.normal(0,self.self_id_noise,3)
-        # CIB newfc = state.fc + NP.random.normal(0,self.id_noise,3)
-        alpha = 0.3
-        sigmaIDtran = 0.1
-        newfc = state.fc + alpha*(2*newfbobs - state.fa - state.fc) + NP.random.normal(0,sigmaIDtran,3)
+        # CIB 
+        newfc = state.fc + NP.random.normal(0,self.id_noise,3)
+        # alpha = 0.3
+        # sigmaIDtran = 0.1
+        # newfc = state.fc + alpha*(2*newfbobs - state.fa - state.fc) + NP.random.normal(0,sigmaIDtran,3)
         
         # TRIED NP.multiply((state.fc+NP.random.normal(0,self.self_id_noise,3)),(2*NP.array(newfbobs)+NP.array(state.fa)+NP.random.normal(0, 0.1, 3))) 
         newfcobs = state.fc + NP.random.normal(0,self.id_obs_noise,3)
         return (State(newfa,newfbsample,newfc,newy,newx,state.turn,state.weight),
-                (newyobs,newxobs,newturnobs,newfbobs[0],newfbobs[1],newfbobs[2]),newreward)
+                (newyobs,newxobs,newturnobs,newfbobs[0],newfbobs[1],newfbobs[2],newfcobs[0],newfcobs[1],newfcobs[2]),
+                newreward)
         
     def updateBelief(self,action,observation,verb=False):
         newsamples=[]
@@ -366,11 +368,11 @@ class CoRobot(object):
             newstate.weight = normpdf_old(observation[0],newstate.y,self.obs_noise)  
             newstate.weight += normpdf_old(observation[1],newstate.x,self.obs_noise) 
             #print newstate.weight
-            newstate.weight+=normpdf_old(observation[3:],newstate.fc,self.id_obs_noise) 
+            #newstate.weight += normpdf_old(observation[6:],newstate.fc,self.id_obs_noise) 
 
             #this is the observation of the client behaviour
             if state.turn == "client":
-                oweight=normpdf_old(observation[3:],newstate.fb,self.id_obs_noise)
+                oweight=normpdf_old(observation[3:5],newstate.fb,self.id_obs_noise)
                 #print "oweight : ",oweight
                 newstate.weight+=oweight
 
@@ -553,11 +555,14 @@ trueClientTurn="client"
 trueY = 0.0
 trueX = 0.0
 
-trueDynNoise = 0.1
-trueObsNoise = 0.1
-#behObsNoise = 0.1
-behObsNoise = 0.001 #CIB
-trueIdObsNoise = 0.1
+#CIB trueDynNoise = 0.1
+trueDynNoise = 0.01
+#CIB trueObsNoise = 0.1 
+trueObsNoise = 0.01 
+#CIB behObsNoise = 0.1
+behObsNoise = 0.01
+#CIB trueIdObsNoise = 0.1
+trueIdObsNoise = 0.01
 
 trueGoal = 10.0
 trueRewSigma = 2.5
@@ -565,14 +570,14 @@ trueRewSigma = 2.5
 obsres = 2.0
 actres = 1.0
 #numcact = 25
-numcact = 50        #CIB
+numcact = 1        #CIB
 #agent_numcact = 25   #possibly increase for a manipulative agent
-agent_numcact = 50  #CIB
+agent_numcact = 1  #CIB
 
 #pomcptimeout=20.0
-pomcptimeout=20.0  #CIB
+pomcptimeout=2.0  #CIB
 #agent_pomcptimeout=100.0  #increase for manipulative agent
-agent_pomcptimeout=20.0 #CIB
+agent_pomcptimeout=2.0 #CIB
 
 osig=1.0
 
