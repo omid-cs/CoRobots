@@ -166,11 +166,13 @@ class CoRobot(object):
         self.N=5000
         self.rough = self.N**(-1.0/3.0)
         self.dyn_noise=0.1
-        self.obs_noise=0.5
+        #CIB self.obs_noise=0.5
+        self.obs_noise=0.1
         self.id_noise=0.1
         
 
-        self.id_obs_noise=1.0
+        #CIB self.id_obs_noise=1.0
+        self.id_obs_noise=0.1
         self.discount_factor=0.9
 
         
@@ -184,7 +186,8 @@ class CoRobot(object):
         #negative identities will strive towards negative goals
         #however, we should be able to set this to 0.0
         #this is the absolute (unsigned) amount of distance to move/moved predicted by the oracle
-        self.oracleMeanValue=0.0  #was 0.678 this is totally arbitrary if it is not zero
+        #CIB self.oracleMeanValue=0.0  #was 0.678 this is totally arbitrary if it is not zero
+        self.oracleMeanValue=0.678
         #oracleMean is the signed amount
         self.oracleMean=self.oracleMeanValue
         if self.identity[0] < 0:
@@ -344,7 +347,6 @@ class CoRobot(object):
         #update newfc based on newfa and newfbobs
 
         newfa = state.fa + NP.random.normal(0,self.self_id_noise,3)
-        # CIB 
         newfc = state.fc + NP.random.normal(0,self.id_noise,3)
         # alpha = 0.3
         # sigmaIDtran = 0.1
@@ -358,6 +360,7 @@ class CoRobot(object):
         
     def updateBelief(self,action,observation,verb=False):
         newsamples=[]
+
         for state in self.beliefState:
             #print 100*"KKK"
             #state.print_val()
@@ -366,13 +369,13 @@ class CoRobot(object):
             #print newobs
             #print observation
             newstate.weight = normpdf_old(observation[0],newstate.y,self.obs_noise)  
-            newstate.weight += normpdf_old(observation[1],newstate.x,self.obs_noise) 
+            newstate.weight += normpdf_old(observation[1],newstate.x,self.obs_noise)
             #print newstate.weight
-            #newstate.weight += normpdf_old(observation[6:],newstate.fc,self.id_obs_noise) 
+            #newstate.weight += normpdf_old(observation[6:],newstate.fc,self.id_obs_noise)
 
             #this is the observation of the client behaviour
             if state.turn == "client":
-                oweight=normpdf_old(observation[3:5],newstate.fb,self.id_obs_noise)
+                oweight = normpdf_old(observation[3:5],newstate.fb,self.id_obs_noise)
                 #print "oweight : ",oweight
                 newstate.weight+=oweight
 
@@ -389,6 +392,13 @@ class CoRobot(object):
             #    print "weight: ",normpdf_old(observation[0],newobs[0],self.obs_noise)
             #    print normpdf_old(observation[3:],newobs[3:],self.id_obs_noise)
 
+        newsamplesw = map(lambda x: x.weight, newsamples)
+        median = NP.median(newsamplesw)
+
+        for state in newsamples:
+        	if state.weight >= median:
+        		state.weight = state.weight*50
+
         if verb:
             for state in newsamples:
                 state.print_val()
@@ -401,8 +411,8 @@ class CoRobot(object):
                 state.print_val()
 
         #possibly roughen samples
-        if self.rough>0:
-            self.roughenSamples(self.beliefState)
+        #if self.rough>0:
+        #	self.roughenSamples(self.beliefState)
 
         return self.beliefState
                             
@@ -547,7 +557,8 @@ print "random seeed is : ",rseed
 NP.random.seed(rseed)
 
 
-defaultId = [0.0,0.0,0.0]
+#defaultId = [0.0,0.0,0.0]
+defaultId = [0.0,-0.5,-0.5]
 
 trueAgentTurn="agent"
 trueClientTurn="client"
@@ -556,13 +567,13 @@ trueY = 0.0
 trueX = 0.0
 
 #CIB trueDynNoise = 0.1
-trueDynNoise = 0.01
+trueDynNoise = 0.001
 #CIB trueObsNoise = 0.1 
-trueObsNoise = 0.01 
+trueObsNoise = 0.001 
 #CIB behObsNoise = 0.1
-behObsNoise = 0.01
+behObsNoise = 0.001
 #CIB trueIdObsNoise = 0.1
-trueIdObsNoise = 0.01
+trueIdObsNoise = 0.001
 
 trueGoal = 10.0
 trueRewSigma = 2.5
@@ -570,16 +581,16 @@ trueRewSigma = 2.5
 obsres = 2.0
 actres = 1.0
 #numcact = 25
-numcact = 1        #CIB
+numcact = 20        #CIB
 #agent_numcact = 25   #possibly increase for a manipulative agent
-agent_numcact = 1  #CIB
+agent_numcact = 20  #CIB
 
 #pomcptimeout=20.0
-pomcptimeout=2.0  #CIB
+pomcptimeout=100.0  #CIB
 #agent_pomcptimeout=100.0  #increase for manipulative agent
-agent_pomcptimeout=2.0 #CIB
+agent_pomcptimeout=100.0 #CIB
 
-osig=1.0
+osig=0.1
 
 #increase this for a manipulative agent
 #osigbeh=0.5
@@ -611,16 +622,11 @@ if len(sys.argv) > 6:
     aa = sys.argv[6].strip()
     randomids=not (aa=="False" or aa=="F" or aa=="0" or aa=="f")
 
-
-
-
 print "running with "
 print "pomcp timeout : ",pomcptimeout
 print "oracle sigma  : ",osig
 print "num iterations: ",numiterations
 print "random ids?: ",randomids
-
-
     
 
 #give everyone a helping start, but a little less so
@@ -629,11 +635,10 @@ print "random ids?: ",randomids
 
 #this is for the setting where client starts with no identity
 #and the only known identity is the agent's own identity
-initClientId_forAgent = defaultId
-initAgentId_forClient = defaultId
 trueClientId = [2.0,2.0,2.0]
 trueAgentId = [-2.0,-1.0,-1.0]
-
+initClientId_forAgent = trueClientId
+initAgentId_forClient = defaultId
 
 if randomids:
     trueClientId = NP.random.normal(0,2.0,3)
@@ -642,10 +647,10 @@ if randomids:
 print "client id: ",trueClientId
 print "agent id:  ",trueAgentId
 
-agent_clientId_noise_init = 4.0
+agent_clientId_noise_init = 0.1
 agent_agentId_noise_init = 0.1
 
-client_clientId_noise_init = 4.0
+client_clientId_noise_init = 0.1
 client_agentId_noise_init = 0.1
 
 #these are 0.01 normally - dynamic noise terms
