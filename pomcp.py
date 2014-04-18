@@ -150,7 +150,7 @@ class PlanNode(object):
         self.actionSet=[]
         self.observSet=[]
         self.observSetData=[]
-        self.children=[]
+        #self.children=[]
         self.Vh=[]
         self.numActions=numa
 
@@ -410,7 +410,7 @@ class POMCP(object):
         numiters=0
         #while numiters < timeout:
         while (time.clock()-start) < timeout:
-            #print "sample :",thesamples[sampleindex].print_val()
+            print "sample : ",sampleindex," is ",thesamples[sampleindex].print_val()
             self.POMCP_simulate(self.ucTree.root,thesamples[sampleindex],0,blackBox)
             
             sampleindex = sampleindex+1
@@ -456,7 +456,8 @@ class POMCP(object):
                     ucNode.addAction(theaction,self.rhi)
                     gotNewAction=True
 
-            if gotNewAction:
+#            if gotNewAction:
+            if False:
                 rolloutval = self.rollout(state,depth,blackBox)
                 #print "rolloutval: ",rolloutval
                 return rolloutval

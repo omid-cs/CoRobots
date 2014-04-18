@@ -186,8 +186,9 @@ class CoRobot(object):
         #negative identities will strive towards negative goals
         #however, we should be able to set this to 0.0
         #this is the absolute (unsigned) amount of distance to move/moved predicted by the oracle
-        #CIB self.oracleMeanValue=0.0  #was 0.678 this is totally arbitrary if it is not zero
-        self.oracleMeanValue=0.678
+        #was 0.678 this is totally arbitrary if it is not zero
+        #CIB self.oracleMeanValue=0.0
+        self.oracleMeanValue=0.05
         #oracleMean is the signed amount
         self.oracleMean=self.oracleMeanValue
         if self.identity[0] < 0:
@@ -196,15 +197,18 @@ class CoRobot(object):
         
 
         #the absolute amount that the client is predicted to move by each frame
-        self.clientMovePrediction = 0.678
+        #CIB self.clientMovePrediction = 0.678
+        self.clientMovePrediction = 0.05
 
         self.initialise()
         self.POMCP_initialise()
 
     def POMCP_initialise(self):
         #should add actres
-        self.pomcp_agent=POMCP(cval=1.0,numcact=self.numcact,numdact=1,obsres=self.obsres,actres=self.actres,timeout=self.timeout)
-        self.pomcp_agent.POMCP_eval(self.beliefState,200,self)
+        self.pomcp_agent=POMCP(cval=1.0,numcact=self.numcact,numdact=1,numaddact=20,obsres=self.obsres,actres=self.actres,timeout=self.timeout)
+        # increase numrollout to ensure that we get more accurate estimates of rhi, rlo, and c_val
+        # CIB self.pomcp_agent.POMCP_eval(self.beliefState,200,self)
+        self.pomcp_agent.POMCP_eval(self.beliefState,1000,self)
 
     def printParams(self):
         self.pomcp_agent.printParams()
@@ -283,7 +287,7 @@ class CoRobot(object):
                 
             #I think this should really be - the client will stay in roughly the same spot as he currently is
             # if he is more powerful - so just set the prediction x action to 0
-            xaction = 0.0
+            #CIB xaction = 0.0
         else:
             #draw from agent - client will do the thing based on agent identity
             if self.identity[0] > 0:
@@ -436,7 +440,7 @@ class CoRobot(object):
     #first element: y-action 
     #next three elements: behaviour communication
     def oracle(self,state,rollout=False,samplenum=0):
-        #this should be in an ACT subclass.  In this parent class, we should draw a rangom sample
+        #this should be in an ACT subclass.  In this parent class, we should draw a random sample
         #but I'm leaving this here for now so that I don't start two files at the same time
         #continuous component of action
         a=NP.array([0.0,0.0,0.0,0.0])
@@ -501,6 +505,7 @@ class CoRobot(object):
 
     def contObsDist(self,obs1,obs2):
         return  (math.sqrt(raw_dist(obs1[0],obs2[0]) +   #element 1 (x) missing?
+                           raw_dist(obs1[1],obs2[1]) +   # CIB I added this line later
                            raw_dist(obs1[3],obs2[3]) +
                            raw_dist(obs1[4],obs2[4]) +
                            raw_dist(obs1[5],obs2[5])))
@@ -578,26 +583,31 @@ trueIdObsNoise = 0.001
 trueGoal = 10.0
 trueRewSigma = 2.5
 
-obsres = 2.0
-actres = 1.0
+#CIB obsres = 2.0
+obsres = 0.1
+
+#CIB actres = 1.0
+actres = 0.1
+
 #numcact = 25
-numcact = 20        #CIB
+numcact = 50        #CIB
 #agent_numcact = 25   #possibly increase for a manipulative agent
-agent_numcact = 20  #CIB
+agent_numcact = 50  #CIB
 
 #pomcptimeout=20.0
-pomcptimeout=100.0  #CIB
+pomcptimeout=0.0001  #CIB
 #agent_pomcptimeout=100.0  #increase for manipulative agent
-agent_pomcptimeout=100.0 #CIB
+agent_pomcptimeout=0.0001 #CIB
 
-osig=0.1
+#CIB osig=1
+osig=0.01
 
 #increase this for a manipulative agent
-#osigbeh=0.5
-osigbeh=0.01        #CIB
+#CIB osigbeh=0.5
+osigbeh=0.01
 #default is that we have the same osigbeh, but a manipulative agent will have a higher value - also should correpondingly increase the pomcp numcact and the pomcp timeout (see above)
-#agent_osigbeh=1.0  
-agent_osigbeh=0.01  #CIB
+#CIB agent_osigbeh=1.0  
+agent_osigbeh=0.01
 
 cbehnoise=0.01  #same as osigbeh by default - this used to be 0.1 but now I think it should be the same as osigbeh
 randomids = False
