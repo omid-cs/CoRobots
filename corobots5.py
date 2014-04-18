@@ -191,7 +191,7 @@ class CoRobot(object):
         #this is the absolute (unsigned) amount of distance to move/moved predicted by the oracle
         #was 0.678 this is totally arbitrary if it is not zero
         #CIB self.oracleMeanValue=0.0
-        self.oracleMeanValue=0.5
+        self.oracleMeanValue=1
         #oracleMean is the signed amount
         self.oracleMean=self.oracleMeanValue
         if self.identity[0] < 0:
@@ -201,14 +201,14 @@ class CoRobot(object):
 
         #the absolute amount that the client is predicted to move by each frame
         #CIB self.clientMovePrediction = 0.678
-        self.clientMovePrediction = 0.5
+        self.clientMovePrediction = 1
 
         self.initialise()
         self.POMCP_initialise()
 
     def POMCP_initialise(self):
         #should add actres
-        self.pomcp_agent=POMCP(cval=1.0,numcact=self.numcact,numdact=1,numaddact=20,obsres=self.obsres,actres=self.actres,timeout=self.timeout)
+        self.pomcp_agent=POMCP(cval=1.0,numcact=self.numcact,numdact=1,numaddact=self.numcact,obsres=self.obsres,actres=self.actres,timeout=self.timeout)
         # increase numrollout to ensure that we get more accurate estimates of rhi, rlo, and c_val
         # CIB self.pomcp_agent.POMCP_eval(self.beliefState,200,self)
         self.pomcp_agent.POMCP_eval(self.beliefState,1000,self)
@@ -586,27 +586,27 @@ behObsNoise = 0.001
 #CIB trueIdObsNoise = 0.1
 trueIdObsNoise = 0.001
 
-trueGoal = 10.0
+trueGoal = 20.0
 trueRewSigma = 2.5
 
 #CIB obsres = 2.0
 obsres = 0.1
 
 #CIB actres = 1.0
-actres = 0.01
+actres = 0.1
 
 #numcact = 25
-numcact = 10        #CIB
+numcact = 30        #CIB
 #agent_numcact = 25   #possibly increase for a manipulative agent
-agent_numcact = 10  #CIB
+agent_numcact = 30  #CIB
 
 #pomcptimeout=20.0
-pomcptimeout=20  #CIB
+pomcptimeout=100  #CIB
 #agent_pomcptimeout=100.0  #increase for manipulative agent
-agent_pomcptimeout=20 #CIB
+agent_pomcptimeout=100 #CIB
 
 #CIB osig=1
-osig=.1
+osig=.5
 
 #increase this for a manipulative agent
 #CIB osigbeh=0.5
