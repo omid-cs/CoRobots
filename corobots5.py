@@ -70,6 +70,7 @@ class State(object):
         self.fc=fc
         self.y=y   #position of the agent
         self.x=x   #position of the other agent
+
         self.turn=turn
         self.weight=weight
 
@@ -149,6 +150,7 @@ class CoRobot(object):
         #so, the default should be that they are the same, but a manipulative agent can have an inflated
         #oracleSigmaBeh, along with a larger number of sampled actions (numcact)
         self.client_beh_noise=kwargs.get("clientbehnoise",0.1)
+        self.client_obs_noise=kwargs.get("clientobsnoise",0.1)
 
 
         self.obsres=kwargs.get("obsres",1.0)
@@ -168,6 +170,7 @@ class CoRobot(object):
         self.dyn_noise=0.1
         #CIB self.obs_noise=0.5
         self.obs_noise=0.1
+
         self.id_noise=0.1
         
 
@@ -188,7 +191,7 @@ class CoRobot(object):
         #this is the absolute (unsigned) amount of distance to move/moved predicted by the oracle
         #was 0.678 this is totally arbitrary if it is not zero
         #CIB self.oracleMeanValue=0.0
-        self.oracleMeanValue=0.05
+        self.oracleMeanValue=0.5
         #oracleMean is the signed amount
         self.oracleMean=self.oracleMeanValue
         if self.identity[0] < 0:
@@ -198,7 +201,7 @@ class CoRobot(object):
 
         #the absolute amount that the client is predicted to move by each frame
         #CIB self.clientMovePrediction = 0.678
-        self.clientMovePrediction = 0.05
+        self.clientMovePrediction = 0.5
 
         self.initialise()
         self.POMCP_initialise()
@@ -218,8 +221,11 @@ class CoRobot(object):
         #each samples is a tuple (continuous_state,discrete_state,weight)
         #we draw all the continuous dimensions independently, although could get some covariances and do them 
         #with multivariate_normal just as well
-        ySamples = NP.random.normal(0,2.0,self.N)
-        xSamples = NP.random.normal(0,2.0,self.N)
+        #CIB ySamples = NP.random.normal(0,2.0,self.N)
+        #CIB xSamples = NP.random.normal(0,2.0,self.N)
+
+        ySamples = NP.random.normal(0,1.0,self.N)
+        xSamples = NP.random.normal(0,1.0,self.N)
 
         fa_eSamples = NP.random.normal(self.identity[0],self.agent_id_noise_init,self.N)
         fa_pSamples = NP.random.normal(self.identity[1],self.agent_id_noise_init,self.N)
@@ -318,7 +324,7 @@ class CoRobot(object):
         newx = state.x + xaction  + NP.random.normal(0,self.dyn_noise,1)
         #the obervations add even more noise
         newyobs = newy + NP.random.normal(0,self.obs_noise,1)
-        newxobs = newx + NP.random.normal(0,self.obs_noise,1)
+        newxobs = newx + NP.random.normal(0,self.client_obs_noise,1)
 
         #stochastic turn taking is commented out for now with True/False trips
         if state.turn==0:  #agent
@@ -587,29 +593,32 @@ trueRewSigma = 2.5
 obsres = 0.1
 
 #CIB actres = 1.0
-actres = 0.1
+actres = 0.01
 
 #numcact = 25
-numcact = 50        #CIB
+numcact = 10        #CIB
 #agent_numcact = 25   #possibly increase for a manipulative agent
-agent_numcact = 50  #CIB
+agent_numcact = 10  #CIB
 
 #pomcptimeout=20.0
-pomcptimeout=0.0001  #CIB
+pomcptimeout=20  #CIB
 #agent_pomcptimeout=100.0  #increase for manipulative agent
-agent_pomcptimeout=0.0001 #CIB
+agent_pomcptimeout=20 #CIB
 
 #CIB osig=1
-osig=0.01
+osig=.1
 
 #increase this for a manipulative agent
 #CIB osigbeh=0.5
-osigbeh=0.01
+osigbeh=0.1
 #default is that we have the same osigbeh, but a manipulative agent will have a higher value - also should correpondingly increase the pomcp numcact and the pomcp timeout (see above)
 #CIB agent_osigbeh=1.0  
-agent_osigbeh=0.01
+agent_osigbeh=0.1
 
-cbehnoise=0.01  #same as osigbeh by default - this used to be 0.1 but now I think it should be the same as osigbeh
+#cbehnoise=1
+cbehnoise=5  #same as osigbeh by default - this used to be 0.1 but now I think it should be the same as osigbeh
+cobslocnoise=1
+
 randomids = False
 #if negative, run forever
 numiterations=-1  
@@ -657,11 +666,11 @@ if randomids:
 print "client id: ",trueClientId
 print "agent id:  ",trueAgentId
 
-agent_clientId_noise_init = 0.1
-agent_agentId_noise_init = 0.1
+agent_clientId_noise_init = 0.01
+agent_agentId_noise_init = 0.01
 
-client_clientId_noise_init = 0.1
-client_agentId_noise_init = 0.1
+client_clientId_noise_init = 0.01
+client_agentId_noise_init = 0.01
 
 #these are 0.01 normally - dynamic noise terms
 client_selfId_noise = 0.01
@@ -676,13 +685,13 @@ iteration=0
 testAgent = CoRobot(goal=trueGoal,x=trueX,identity=trueAgentId,clientid=initClientId_forAgent,
                     cid_init=agent_clientId_noise_init,aid_init=agent_agentId_noise_init,sid_noise=agent_selfId_noise,
                     turn=trueAgentTurn,timeout=agent_pomcptimeout,obsres=obsres,actres=actres,numcact=agent_numcact,oraclesig=osig,
-                    oraclesigbeh=agent_osigbeh,clientbehnoise=cbehnoise)
+                    oraclesigbeh=agent_osigbeh,clientbehnoise=cbehnoise,clientobsnoise=cobslocnoise)
 
 
 testClient = CoRobot(goal=trueGoal,x=trueX,identity=trueClientId,clientid=initAgentId_forClient,
                      cid_init=client_clientId_noise_init,aid_init=client_agentId_noise_init,sid_noise=client_selfId_noise,
                      turn=trueClientTurn,timeout=pomcptimeout,obsres=obsres,actres=actres,numcact=numcact,oraclesig=osig,
-                     oraclesigbeh=osigbeh,clientbehnoise=cbehnoise)
+                     oraclesigbeh=osigbeh,clientbehnoise=cbehnoise,clientobsnoise=cobslocnoise)
 
 beliefStateAgent = testAgent.initialise()
 beliefStateClient = testClient.initialise()

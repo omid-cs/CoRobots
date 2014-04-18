@@ -444,24 +444,32 @@ class POMCP(object):
         if math.pow(blackBox.discount_factor,depth) < self.epsilon:
             return 0
 
-        if ucNode.numActions<self.numActions:   #keep adding until we reach max number
+        # if ucNode.numActions<self.numActions:   #keep adding until we reach max number
             
-            gotNewAction=False
-            #draw a set of samples of actions as the new set
-            for aindex in range(self.numAddActions):
-                #get the action to take - returns by the oracle which can just spit out
-                #random actions, or can go through a sequence by using the third argument
-                theaction=blackBox.oracle(state,False,ucNode.numActions)
-                if ucNode.numActions<self.numActions and not blackBox.hasAction(ucNode.actionSet,theaction,self.actResolv):
-                    ucNode.addAction(theaction,self.rhi)
-                    gotNewAction=True
+        #     gotNewAction=False
+        #     #draw a set of samples of actions as the new set
+        #     for aindex in range(self.numAddActions):
+        #         #get the action to take - returns by the oracle which can just spit out
+        #         #random actions, or can go through a sequence by using the third argument
+        #         theaction=blackBox.oracle(state,False,ucNode.numActions)
+        #         if ucNode.numActions<self.numActions and not blackBox.hasAction(ucNode.actionSet,theaction,self.actResolv):
+        #             ucNode.addAction(theaction,self.rhi)
+        #             gotNewAction=True
 
-#            if gotNewAction:
-            if False:
-                rolloutval = self.rollout(state,depth,blackBox)
-                #print "rolloutval: ",rolloutval
-                return rolloutval
+
+        #     if gotNewAction:
+        #         rolloutval = self.rollout(state,depth,blackBox)
+        #         #print "rolloutval: ",rolloutval
+        #         return rolloutval
             
+        if ucNode.numActions==0:
+            while ucNode.numActions<self.numActions:
+                #print "ucNode.numActions: ",ucNode.numActions
+                theaction=blackBox.oracle(state,False,ucNode.numActions)
+                if not blackBox.hasAction(ucNode.actionSet,theaction,self.actResolv):
+                    ucNode.addAction(theaction,self.rhi)
+            return self.rollout(state,depth,blackBox)
+
         
         #pick best action to take with the UCB formula
         #any new ones that were added will be explored more
@@ -536,6 +544,7 @@ class POMCP(object):
             ucNode.observSetData[besta].append([])
             ucNode.observSetData[besta][-1].append(newobs)
             ucNode.children[besta].append(PlanNode(0)) #was: ucNode.numActions))
+
             #obsExists stays as -1 as it is now the last element
 
         thereward = newreward+blackBox.discount_factor*self.POMCP_simulate(ucNode.children[besta][obsExists],newsample,depth+1,blackBox)
