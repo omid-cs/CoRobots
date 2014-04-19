@@ -402,13 +402,6 @@ class CoRobot(object):
             #    print "weight: ",normpdf_old(observation[0],newobs[0],self.obs_noise)
             #    print normpdf_old(observation[3:],newobs[3:],self.id_obs_noise)
 
-        newsamplesw = map(lambda x: x.weight, newsamples)
-        median = NP.median(newsamplesw)
-
-        for state in newsamples:
-        	if state.weight >= median:
-        		state.weight = state.weight*50
-
         if verb:
             for state in newsamples:
                 state.print_val()
@@ -421,8 +414,8 @@ class CoRobot(object):
                 state.print_val()
 
         #possibly roughen samples
-        #if self.rough>0:
-        #	self.roughenSamples(self.beliefState)
+        if self.rough>0:
+        	self.roughenSamples(self.beliefState)
 
         return self.beliefState
                             
