@@ -191,7 +191,7 @@ class CoRobot(object):
         #this is the absolute (unsigned) amount of distance to move/moved predicted by the oracle
         #was 0.678 this is totally arbitrary if it is not zero
         #CIB self.oracleMeanValue=0.0
-        self.oracleMeanValue=1
+        self.oracleMeanValue = 0.4
         #oracleMean is the signed amount
         self.oracleMean=self.oracleMeanValue
         if self.identity[0] < 0:
@@ -201,7 +201,7 @@ class CoRobot(object):
 
         #the absolute amount that the client is predicted to move by each frame
         #CIB self.clientMovePrediction = 0.678
-        self.clientMovePrediction = 1
+        self.clientMovePrediction = 0.4
 
         self.initialise()
         self.POMCP_initialise()
@@ -362,7 +362,6 @@ class CoRobot(object):
         # sigmaIDtran = 0.1
         # newfc = state.fc + alpha*(2*newfbobs - state.fa - state.fc) + NP.random.normal(0,sigmaIDtran,3)
         
-        # TRIED NP.multiply((state.fc+NP.random.normal(0,self.self_id_noise,3)),(2*NP.array(newfbobs)+NP.array(state.fa)+NP.random.normal(0, 0.1, 3))) 
         newfcobs = state.fc + NP.random.normal(0,self.id_obs_noise,3)
         return (State(newfa,newfbsample,newfc,newy,newx,state.turn,state.weight),
                 (newyobs,newxobs,newturnobs,newfbobs[0],newfbobs[1],newfbobs[2],newfcobs[0],newfcobs[1],newfcobs[2]),
@@ -442,7 +441,9 @@ class CoRobot(object):
         #this should be in an ACT subclass.  In this parent class, we should draw a random sample
         #but I'm leaving this here for now so that I don't start two files at the same time
         #continuous component of action
-        a=NP.array([0.0,0.0,0.0,0.0])
+        
+        #a=NP.array([0.0,0.0,0.0,0.0])
+
         #use the sigmoid computation
         #if ps>0.5 it means the agent is in control
         pa = self.sigmoid(self.identity,state.fc)
@@ -579,7 +580,7 @@ behObsNoise = 0.001
 #CIB trueIdObsNoise = 0.1
 trueIdObsNoise = 0.001
 
-trueGoal = 20.0
+trueGoal = 10.0
 trueRewSigma = 2.5
 
 #CIB obsres = 2.0
@@ -589,17 +590,17 @@ obsres = 0.1
 actres = 0.1
 
 #numcact = 25
-numcact = 30        #CIB
+numcact = 20        #CIB
 #agent_numcact = 25   #possibly increase for a manipulative agent
-agent_numcact = 30  #CIB
+agent_numcact = 20  #CIB
 
 #pomcptimeout=20.0
-pomcptimeout=100  #CIB
+pomcptimeout=20  #CIB
 #agent_pomcptimeout=100.0  #increase for manipulative agent
-agent_pomcptimeout=100 #CIB
+agent_pomcptimeout=20 #CIB
 
 #CIB osig=1
-osig=.5
+osig=0.2
 
 #increase this for a manipulative agent
 #CIB osigbeh=0.5
@@ -614,7 +615,7 @@ cobslocnoise=1
 
 randomids = False
 #if negative, run forever
-numiterations=-1  
+numiterations = 2 
 
 #if True, will pause the simulation for search tree exploratations
 doInteractive = False
@@ -673,6 +674,9 @@ agent_selfId_noise  = 0.01
 totalreward=0.0
 
 iteration=0
+
+trueAgentLocations=[]
+trueClientLocations=[]
 
 #true client id is passed to each agent, but only used by the oracle when poracle is true for tests/comparisons
 testAgent = CoRobot(goal=trueGoal,x=trueX,identity=trueAgentId,clientid=initClientId_forAgent,
@@ -784,7 +788,9 @@ while numiterations<0 or iteration<numiterations:
     xaction = client_action[0][0]
     
     trueY = trueY + yaction  + NP.random.normal(0,trueDynNoise,1)
+    trueAgentLocations.append(trueY)
     trueX = trueX + xaction  + NP.random.normal(0,trueDynNoise,1)
+    trueClientLocations.append(trueX)
 
     trueYobs = trueY + NP.random.normal(0,trueObsNoise,1)
     trueXobs = trueX + NP.random.normal(0,trueObsNoise,1)
