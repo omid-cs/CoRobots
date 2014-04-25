@@ -617,7 +617,7 @@ agent_osigbeh=0.5
 
 #cbehnoise=1
 cbehnoise=0.1  #same as osigbeh by default - this used to be 0.1 but now I think it should be the same as osigbeh
-cobslocnoise=1
+cobslocnoise=0.1
 
 randomids = False
 #if negative, run forever
