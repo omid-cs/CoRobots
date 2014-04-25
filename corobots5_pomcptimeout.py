@@ -14,7 +14,7 @@ from pomcp_manipulative import *
 import numpy as NP
 import threading
 import time
-from plotter import *
+#from plotter import *
 import csv
 
 #simple threading class so we can do two things at once
@@ -635,7 +635,7 @@ if len(sys.argv) > 2:
 if len(sys.argv) > 3:
     agent_numcact=int(sys.argv[3])
 if len(sys.argv) > 4:
-    flag=float(sys.argv[4])
+    flag=bool(sys.argv[4])
 if len(sys.argv) > 5:
     numiterations=int(sys.argv[5])
 if len(sys.argv) > 6:
