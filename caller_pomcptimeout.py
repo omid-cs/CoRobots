@@ -1,7 +1,7 @@
 import os
 import csv
 
-for i in range(50):
+for i in range(5):
 	with open('status_pomcptimeout.csv', 'a') as fp:
 		a = csv.writer(fp, delimiter=',')
 		data = [["i","agent_pomcptimeout"],[i,50]]
@@ -12,7 +12,7 @@ for i in range(50):
 	os.system("python corobots5_pomcptimeout.py 50 0.8 25 True")
 	os.system("python corobots5_pomcptimeout.py 50 1.0 25 True")
 
-for i in range(50):
+for i in range(5):
 	with open('status_pomcptimeout.csv', 'a') as fp:
 		a = csv.writer(fp, delimiter=',')
 		data = [["i","agent_pomcptimeout"],[i,100]]
@@ -23,7 +23,7 @@ for i in range(50):
 	os.system("python corobots5_pomcptimeout.py 100 0.8 25 True")
 	os.system("python corobots5_pomcptimeout.py 100 1.0 25 True")
 
-for i in range(50):
+for i in range(5):
 	with open('status_pomcptimeout.csv', 'a') as fp:
 		a = csv.writer(fp, delimiter=',')
 		data = [["i","agent_pomcptimeout"],[i,150]]

@@ -385,8 +385,8 @@ class CoRobot(object):
             #newstate.print_val()
             #print newobs
             #print observation
-            newstate.weight = normpdf_old(observation[0],newstate.y,self.obs_noise)  
-            newstate.weight += normpdf_old(observation[1],newstate.x,self.obs_noise)
+            #newstate.weight = normpdf_old(observation[0],newstate.y,self.obs_noise)  
+            #newstate.weight += normpdf_old(observation[1],newstate.x,self.obs_noise)
             #print newstate.weight
             #newstate.weight += normpdf_old(observation[6:],newstate.fc,self.id_obs_noise)
 
@@ -543,7 +543,7 @@ class CoRobot(object):
 
         return (besto,bestdist)
 
-    #check to see if action is in actionSet (to within actres resolution - includes all 4 dimensionsx)
+    #check to see if action is in actionSet (to within actres resolution)
     def hasAction(self,actionSet,action,actres):
         for a1 in actionSet:
             if math.sqrt(raw_dist(action[0],a1[0])) < actres:       
@@ -591,10 +591,10 @@ trueGoal = 10.0
 trueRewSigma = 2.5
 
 #CIB obsres = 2.0
-obsres = 0.1
+obsres = 0.01
 
 #CIB actres = 1.0
-actres = 0.1
+actres = 0.01
 
 #numcact = 25
 numcact = 1        #CIB
@@ -607,9 +607,8 @@ pomcptimeout=20  #CIB
 agent_pomcptimeout=100 #CIB
 
 #CIB osig=1
-osig=0.2
+osig=0.1
 
-#increase this for a manipulative agent
 #CIB osigbeh=0.5
 osigbeh=0.1
 #default is that we have the same osigbeh, but a manipulative agent will have a higher value - also should correpondingly increase the pomcp numcact and the pomcp timeout (see above)
@@ -617,7 +616,7 @@ osigbeh=0.1
 agent_osigbeh=0.5
 
 #cbehnoise=1
-cbehnoise=5  #same as osigbeh by default - this used to be 0.1 but now I think it should be the same as osigbeh
+cbehnoise=0.1  #same as osigbeh by default - this used to be 0.1 but now I think it should be the same as osigbeh
 cobslocnoise=1
 
 randomids = False
