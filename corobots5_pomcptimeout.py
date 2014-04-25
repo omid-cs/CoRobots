@@ -569,9 +569,6 @@ rseed = NP.random.randint(0,382948932)
 print "random seeed is : ",rseed
 NP.random.seed(rseed)
 
-outputfile = 'manipulation_pomcptimeout.csv'
-#outputfile = 'manipulation_numcact.csv'
-
 #defaultId = [0.0,0.0,0.0]
 #defaultId = 0.5*(trueClientId+trueAgentId)
 
@@ -638,7 +635,7 @@ if len(sys.argv) > 2:
 if len(sys.argv) > 3:
     agent_numcact=int(sys.argv[3])
 if len(sys.argv) > 4:
-    osig=float(sys.argv[4])
+    flag=float(sys.argv[4])
 if len(sys.argv) > 5:
     numiterations=int(sys.argv[5])
 if len(sys.argv) > 6:
@@ -655,6 +652,10 @@ print "oracle sigma  : ",osig
 print "num iterations: ",numiterations
 print "random ids?: ",randomids
     
+if flag==True:
+    outputfile = 'manipulation_pomcptimeout.csv'
+else:
+    outputfile = 'manipulation_numcact.csv'
 
 #give everyone a helping start, but a little less so
 #initClientId_forAgent = trueClientId
