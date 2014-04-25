@@ -10,11 +10,12 @@ Code is provided without any guarantees.
 Research sponsored by the Natural Sciences and Engineering Council of Canada (NSERC).
 see README for details
 ----------------------------------------------------------------------------------------------"""
-from pomcp import *
+from pomcp_manipulative import *
 import numpy as NP
 import threading
 import time
 from plotter import *
+import csv
 
 #simple threading class so we can do two things at once
 class myThread (threading.Thread):
@@ -178,8 +179,8 @@ class CoRobot(object):
         
 
         #CIB self.id_obs_noise=1.0
-        self.id_obs_noise=.3
-        self.discount_factor=0.95
+        self.id_obs_noise=0.1
+        self.discount_factor=0.9
 
         
         self.beliefSimilarity = -1.0
@@ -256,10 +257,8 @@ class CoRobot(object):
 
     def getPossibleNextActions(self):
         return self.pomcp_agent.getPossibleNextActions()
-        
 
-    def get_next_action(self):
-        return self.pomcp_agent.POMCP_search(self.beliefState,self,self.timeout)
+        
 
     def get_next_action_client(self):
         return self.pomcp_agent.POMCP_search(self.beliefState,self,"clientThread",self.timeout)
@@ -386,9 +385,8 @@ class CoRobot(object):
             #newstate.print_val()
             #print newobs
             #print observation
-            newstate.weight = 0
-            #CIB newstate.weight = normpdf_old(observation[0],newstate.y,self.obs_noise)  
-            #CIB newstate.weight += normpdf_old(observation[1],newstate.x,self.obs_noise)
+            newstate.weight = normpdf_old(observation[0],newstate.y,self.obs_noise)  
+            newstate.weight += normpdf_old(observation[1],newstate.x,self.obs_noise)
             #print newstate.weight
             #newstate.weight += normpdf_old(observation[6:],newstate.fc,self.id_obs_noise)
 
@@ -424,7 +422,7 @@ class CoRobot(object):
 
         #possibly roughen samples
         if self.rough>0:
-        	self.roughenSamples(self.beliefState)
+            self.roughenSamples(self.beliefState)
 
         return self.beliefState
                             
@@ -571,9 +569,11 @@ rseed = NP.random.randint(0,382948932)
 print "random seeed is : ",rseed
 NP.random.seed(rseed)
 
+outputfile = 'manipulation_pomcptimeout.csv'
+#outputfile = 'manipulation_numcact.csv'
 
 #defaultId = [0.0,0.0,0.0]
-defaultId = [0.0,-0.5,-0.5]
+#defaultId = 0.5*(trueClientId+trueAgentId)
 
 trueAgentTurn="agent"
 trueClientTurn="client"
@@ -600,14 +600,14 @@ obsres = 0.1
 actres = 0.1
 
 #numcact = 25
-numcact = 20        #CIB
+numcact = 1        #CIB
 #agent_numcact = 25   #possibly increase for a manipulative agent
-agent_numcact = 20  #CIB
+agent_numcact = 25  #CIB
 
 #pomcptimeout=20.0
-pomcptimeout=30  #CIB
+pomcptimeout=20  #CIB
 #agent_pomcptimeout=100.0  #increase for manipulative agent
-agent_pomcptimeout=30 #CIB
+agent_pomcptimeout=100 #CIB
 
 #CIB osig=1
 osig=0.2
@@ -617,7 +617,7 @@ osig=0.2
 osigbeh=0.1
 #default is that we have the same osigbeh, but a manipulative agent will have a higher value - also should correpondingly increase the pomcp numcact and the pomcp timeout (see above)
 #CIB agent_osigbeh=1.0  
-agent_osigbeh=0.1
+agent_osigbeh=0.5
 
 #cbehnoise=1
 cbehnoise=5  #same as osigbeh by default - this used to be 0.1 but now I think it should be the same as osigbeh
@@ -625,24 +625,28 @@ cobslocnoise=1
 
 randomids = False
 #if negative, run forever
-numiterations = 40 
+numiterations = -1 
 
 #if True, will pause the simulation for search tree exploratations
 doInteractive = False
-
+epsilon = 0.2
 #get user inputs if there
 if len(sys.argv) > 1:
-    pomcptimeout=float(sys.argv[1])
+    agent_pomcptimeout=float(sys.argv[1])
 if len(sys.argv) > 2:
-    osig=float(sys.argv[2])
+    epsilon=float(sys.argv[2])
 if len(sys.argv) > 3:
-    numiterations=int(sys.argv[3])
+    agent_numcact=int(sys.argv[3])
 if len(sys.argv) > 4:
-    numcact=int(sys.argv[4])
+    osig=float(sys.argv[4])
 if len(sys.argv) > 5:
-    actres=float(sys.argv[5])
+    numiterations=int(sys.argv[5])
 if len(sys.argv) > 6:
-    aa = sys.argv[6].strip()
+    numcact=int(sys.argv[6])
+if len(sys.argv) > 7:
+    actres=float(sys.argv[7])
+if len(sys.argv) > 8:
+    aa = sys.argv[8].strip()
     randomids=not (aa=="False" or aa=="F" or aa=="0" or aa=="f")
 
 print "running with "
@@ -658,10 +662,11 @@ print "random ids?: ",randomids
 
 #this is for the setting where client starts with no identity
 #and the only known identity is the agent's own identity
+
 trueClientId = [2.0,2.0,2.0]
-trueAgentId = [-2.0,-1.0,-1.0]
-initClientId_forAgent = trueClientId
-initAgentId_forClient = defaultId
+trueAgentId = [-2.0,2.0-epsilon,2.0-epsilon]
+initClientId_forAgent = 0.5*NP.array(trueClientId+trueAgentId)
+initAgentId_forClient = 0.5*NP.array(trueClientId+trueAgentId)
 
 if randomids:
     trueClientId = NP.random.normal(0,2.0,3)
@@ -729,7 +734,7 @@ while numiterations<0 or iteration<numiterations:
         x.append(b.fc[1])
         y.append(b.fc[2])
 
-    plotBeliefStates(zip(x,y),trueClientId,meanfcClient[0],'Client5-',iteration)
+    #plotBeliefStates(zip(x,y),trueClientId,meanfcClient[0],'Client5-',iteration)
 
     meanfc = 0
     numsamps=0
@@ -744,7 +749,7 @@ while numiterations<0 or iteration<numiterations:
         x.append(b.fc[1])
         y.append(b.fc[2])
 
-    plotBeliefStates(zip(x,y),trueAgentId,meanfcAgent[0],'Agent5-',iteration)
+    #plotBeliefStates(zip(x,y),trueAgentId,meanfcAgent[0],'Agent5-',iteration)
 
 
     if False:
@@ -892,7 +897,34 @@ while numiterations<0 or iteration<numiterations:
     
     totalreward=totalreward+newreward
 
+    if iteration == 0:
+        with open(outputfile, 'a') as fp:
+                a = csv.writer(fp, delimiter=',')
+                data = [["pomcptimeout", "agent_pomcptimeout", "numcact", "agent_numcact", "epsilon"], [pomcptimeout, agent_pomcptimeout, numcact, agent_numcact, epsilon] ]
+                a.writerows(data)
+    if abs(trueAgentLocations[-1]-trueClientLocations[-1]) < 1.0:
+        if trueAgentLocations[-1] >= trueGoal or trueClientLocations[-1] >= trueGoal:
+            with open(outputfile, 'a') as fp:
+                a = csv.writer(fp, delimiter=',')
+                data = [['failed manipulation', iteration]]
+                a.writerows(data)
+            break
+        elif trueAgentLocations[-1] <= -1.0*trueGoal or trueClientLocations[-1] <= -1.0*trueGoal:
+            with open(outputfile, 'a') as fp:
+                a = csv.writer(fp, delimiter=',')
+                data = [['success manipulation', iteration]]
+                a.writerows(data)
+            break
+    else:
+        if iteration ==50:
+            break
     iteration=iteration+1
 
-print "final reward obtained (in ",iteration," iterations): ",totalreward
-plotRobotsLocation(trueAgentLocations,trueClientLocations,trueGoal,numiterations)
+with open(outputfile, 'a') as fp:
+    a = csv.writer(fp, delimiter=',')
+    data = [['exit','agent positions'], [trueAgentLocations]]
+    a.writerows(data)
+    data = [['exit','client positions'], [trueClientLocations]]
+    a.writerows(data)
+#print "final reward obtained (in ",iteration," iterations): ",totalreward
+#plotRobotsLocation(trueAgentLocations,trueClientLocations,trueGoal,numiterations)

@@ -450,7 +450,10 @@ class POMCP(object):
             for aindex in range(self.numAddActions):
                 #get the action to take - returns by the oracle which can just spit out
                 #random actions, or can go through a sequence by using the third argument
-                theaction=blackBox.oracle(state,False,ucNode.numActions)
+                if threadID=="agentThread" and state.turn=="agent":
+                    theaction=blackBox.oracle(state,False,ucNode.numActions)
+                else:
+                    theaction=blackBox.oracle(state,False,0)
                 if ucNode.numActions<self.numActions and not blackBox.hasAction(ucNode.actionSet,theaction,self.actResolv):
                     ucNode.addAction(theaction,self.rhi)
                     gotNewAction=True
