@@ -636,13 +636,15 @@ if len(sys.argv) > 3:
 if len(sys.argv) > 4:
     flag=int(sys.argv[4])
 if len(sys.argv) > 5:
-    numiterations=int(sys.argv[5])
+    runIndex=int(sys.argv[5])
 if len(sys.argv) > 6:
-    numcact=int(sys.argv[6])
+    numiterations=int(sys.argv[6])
 if len(sys.argv) > 7:
-    actres=float(sys.argv[7])
+    numcact=int(sys.argv[7])
 if len(sys.argv) > 8:
-    aa = sys.argv[8].strip()
+    actres=float(sys.argv[8])
+if len(sys.argv) > 9:
+    aa = sys.argv[9].strip()
     randomids=not (aa=="False" or aa=="F" or aa=="0" or aa=="f")
 
 print "running with "
@@ -652,9 +654,9 @@ print "num iterations: ",numiterations
 print "random ids?: ",randomids
     
 if flag==1:
-    outputfile = 'manipulation_pomcptimeout.csv'
+    outputfile = "manipulation_pomcptimeout"+str(runIndex)+"-"+str(pomcptimeout)+".csv"
 else:
-    outputfile = 'manipulation_numcact.csv'
+    outputfile = "manipulation_numcact"+str(runIndex)+"-"+str(agent_numcact)+".csv"
 
 #give everyone a helping start, but a little less so
 #initClientId_forAgent = trueClientId
@@ -897,6 +899,13 @@ while numiterations<0 or iteration<numiterations:
     
     totalreward=totalreward+newreward
 
+    with open(outputfile, 'a') as fp:
+        a = csv.writer(fp, delimiter=',')
+        data = [['agent position'], [trueAgentLocations[-1]]]
+        a.writerows(data)
+        data = [['client position'], [trueClientLocations[-1]]]
+        a.writerows(data)
+
     if iteration == 0:
         with open(outputfile, 'a') as fp:
                 a = csv.writer(fp, delimiter=',')
@@ -920,11 +929,5 @@ while numiterations<0 or iteration<numiterations:
             break
     iteration=iteration+1
 
-with open(outputfile, 'a') as fp:
-    a = csv.writer(fp, delimiter=',')
-    data = [['exit','agent positions'], [trueAgentLocations]]
-    a.writerows(data)
-    data = [['exit','client positions'], [trueClientLocations]]
-    a.writerows(data)
 #print "final reward obtained (in ",iteration," iterations): ",totalreward
 #plotRobotsLocation(trueAgentLocations,trueClientLocations,trueGoal,numiterations)
