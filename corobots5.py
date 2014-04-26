@@ -458,7 +458,11 @@ class CoRobot(object):
         #if ps>0.5 it means the agent is in control
         pa = self.sigmoid(self.identity,state.fc)
         if pa > 0.5:
-            omean = self.oracleMean
+            #CIB omean = self.oracleMean
+            if self.identity[0]>0:
+                omean = self.oracleMean
+            else:
+                omean = -1*self.oracleMean
         elif state.fc[0]>0:
             omean = self.oracleMeanValue
         else:
