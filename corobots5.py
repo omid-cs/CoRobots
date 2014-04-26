@@ -310,10 +310,10 @@ class CoRobot(object):
             else:
                 xaction = -1.0*self.clientMovePrediction
             #could make it so the client just moves towards the agent as well here
-            if state.y > state.x:
-                xaction = self.clientMovePrediction
-            else:
-                xaction = -1.0*self.clientMovePrediction
+            # if state.y > state.x:
+            #     xaction = self.clientMovePrediction
+            # else:
+            #     xaction = -1.0*self.clientMovePrediction
                 
             
         #this is our prediction noise for client behaviours
@@ -458,11 +458,7 @@ class CoRobot(object):
         #if ps>0.5 it means the agent is in control
         pa = self.sigmoid(self.identity,state.fc)
         if pa > 0.5:
-            #CIB omean = self.oracleMean
-            if self.identity[0]>0:
-                omean = self.oracleMean
-            else:
-                omean = -1*self.oracleMean
+            omean = self.oracleMean
         elif state.fc[0]>0:
             omean = self.oracleMeanValue
         else:
