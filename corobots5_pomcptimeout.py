@@ -212,7 +212,7 @@ class CoRobot(object):
 
     def POMCP_initialise(self):
         #should add actres
-        self.pomcp_agent=POMCP(cval=1.0,numcact=self.numcact,numdact=1,numaddact=self.numcact,obsres=self.obsres,actres=self.actres,timeout=self.timeout)
+        self.pomcp_agent=POMCP(cval=1.0,numcact=self.numcact,numdact=1,numaddact=1,obsres=self.obsres,actres=self.actres,timeout=self.timeout)
         # increase numrollout to ensure that we get more accurate estimates of rhi, rlo, and c_val
         # CIB self.pomcp_agent.POMCP_eval(self.beliefState,200,self)
         self.pomcp_agent.POMCP_eval(self.beliefState,1000,self)
@@ -385,8 +385,9 @@ class CoRobot(object):
             #newstate.print_val()
             #print newobs
             #print observation
-            #newstate.weight = normpdf_old(observation[0],newstate.y,self.obs_noise)  
-            #newstate.weight += normpdf_old(observation[1],newstate.x,self.obs_noise)
+            newstate.weight = 0
+            #CIB newstate.weight = normpdf_old(observation[0],newstate.y,self.obs_noise)  
+            #CIB newstate.weight += normpdf_old(observation[1],newstate.x,self.obs_noise)
             #print newstate.weight
             #newstate.weight += normpdf_old(observation[6:],newstate.fc,self.id_obs_noise)
 
@@ -439,6 +440,12 @@ class CoRobot(object):
                     (state.fc[2]+state.fa[2])/2.0]
         return fbaction
 
+    def predictManipulativeBehaviour(self,state):
+        #prediction of behaviour is that it is somewhere between the two identities
+        fbaction = [(7.0*state.fc[0]+state.fa[0])/8.0,
+                    (7.0*state.fc[1]+state.fa[1])/8.0,
+                    (7.0*state.fc[2]+state.fa[2])/8.0]
+        return fbaction
 
     #rollout is a boolean flag  - if we are doing a rollout, then
     #this sample function computes and returns the rollout policy
@@ -471,7 +478,10 @@ class CoRobot(object):
             if samplenum==0:
                 a = NP.append(yact,self.predictBehaviour(state))
             else:
-                a = NP.append(yact,NP.random.normal(self.predictBehaviour(state),self.oracleSigmaBeh))
+                if pa > 0.5:
+                    a = NP.append(yact,NP.random.normal(self.predictBehaviour(state),self.oracleSigmaBeh))
+                else:   # if agent is less powerful
+                    a = NP.append(yact,NP.random.normal(self.predictManipulativeBehaviour(state),self.oracleSigmaBeh))
         else:
             a = NP.append(yact,NP.array([0.0,0.0,0.0]))
 
@@ -546,13 +556,15 @@ class CoRobot(object):
     #check to see if action is in actionSet (to within actres resolution)
     def hasAction(self,actionSet,action,actres):
         for a1 in actionSet:
-            if math.sqrt(raw_dist(action[0],a1[0])) < actres:       
+            #CIB if math.sqrt(raw_dist(action[0],a1[0])) < actres:
+            if math.sqrt(raw_dist(action,a1)) < actres:       
                 return True
         return False
 
     #distance bewteen two actions - Negative means infinite
     def actionDist(self,a1,a2):
-        return math.sqrt(raw_dist(a1[0],a2[0]))
+        #CIB return math.sqrt(raw_dist(a1[0],a2[0]))
+        return math.sqrt(raw_dist(a1,a2))
 
     #distance between two obwervatoins - negative means infinite
     def observationDist(self,obs1,obs2):
@@ -591,10 +603,10 @@ trueGoal = 10.0
 trueRewSigma = 2.5
 
 #CIB obsres = 2.0
-obsres = 0.01
+obsres = 2
 
 #CIB actres = 1.0
-actres = 0.01
+actres = 2
 
 #numcact = 25
 numcact = 1        #CIB
@@ -607,7 +619,7 @@ pomcptimeout=20  #CIB
 agent_pomcptimeout=100 #CIB
 
 #CIB osig=1
-osig=0.1
+osig=1
 
 #CIB osigbeh=0.5
 osigbeh=0.1
