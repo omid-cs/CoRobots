@@ -557,14 +557,14 @@ class CoRobot(object):
     def hasAction(self,actionSet,action,actres):
         for a1 in actionSet:
             #CIB if math.sqrt(raw_dist(action[0],a1[0])) < actres:
-            if math.sqrt(raw_dist(action,a1)) < actres:       
+            if math.sqrt(raw_dist1(action,a1)) < actres:       
                 return True
         return False
 
     #distance bewteen two actions - Negative means infinite
     def actionDist(self,a1,a2):
         #CIB return math.sqrt(raw_dist(a1[0],a2[0]))
-        return math.sqrt(raw_dist(a1,a2))
+        return math.sqrt(raw_dist1(a1,a2))
 
     #distance between two obwervatoins - negative means infinite
     def observationDist(self,obs1,obs2):
@@ -910,7 +910,11 @@ while numiterations<0 or iteration<numiterations:
     
     
     totalreward=totalreward+newreward
-
+    if iteration == 0:
+        with open(outputfile, 'a') as fp:
+                a = csv.writer(fp, delimiter=',')
+                data = [["pomcptimeout", "agent_pomcptimeout", "numcact", "agent_numcact", "epsilon"], [pomcptimeout, agent_pomcptimeout, numcact, agent_numcact, epsilon] ]
+                a.writerows(data)
     with open(outputfile, 'a') as fp:
         a = csv.writer(fp, delimiter=',')
         data = [['agent position'], [trueAgentLocations[-1]]]
@@ -918,11 +922,7 @@ while numiterations<0 or iteration<numiterations:
         data = [['client position'], [trueClientLocations[-1]]]
         a.writerows(data)
 
-    if iteration == 0:
-        with open(outputfile, 'a') as fp:
-                a = csv.writer(fp, delimiter=',')
-                data = [["pomcptimeout", "agent_pomcptimeout", "numcact", "agent_numcact", "epsilon"], [pomcptimeout, agent_pomcptimeout, numcact, agent_numcact, epsilon] ]
-                a.writerows(data)
+    
     if abs(trueAgentLocations[-1]-trueClientLocations[-1]) < 1.0:
         if trueAgentLocations[-1] >= trueGoal or trueClientLocations[-1] >= trueGoal:
             with open(outputfile, 'a') as fp:

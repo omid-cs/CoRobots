@@ -73,6 +73,11 @@ def raw_dist(epa1,epa2):
     dd = NP.array(epa1)-NP.array(epa2)
     return NP.dot(dd,dd)
 
+def raw_dist1(epa1,epa2):
+    dd = NP.array(epa1)-NP.array(epa2)
+    dd = dd.flatten()
+    return NP.dot(dd,dd)
+
 #kindof in bayesact
 def normpdf_old(x, mean, sd):
     size=len(x)
@@ -420,7 +425,7 @@ class POMCP(object):
                 sampleindex=0
             numiters = numiters + 1
             
-        print "searched ",numiters," iterations of POMCP_search"
+        print "searched ",numiters," iterations of POMCP_search, thread ",threadID
         xx = self.ucTree.getBestAction()
         return self.ucTree.getBestAction()
 
