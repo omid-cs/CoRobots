@@ -1,34 +1,34 @@
 pomcptimeout,agent_pomcptimeout,numcact,agent_numcact,epsilon
-20,100.0,1,25,0.0
+20,100.0,1,25,2.0
 agent position
-[-1.03445827]
+[ 1.05832933]
 client position
-[ 1.09702992]
+[ 1.00514355]
 agent position
-[-0.03355439]
+[ 0.14596976]
 client position
-[ 0.01059486]
+[ 1.91468755]
 agent position
-[-1.13222299]
+[ 0.96860218]
 client position
-[-0.98370135]
+[ 2.98396526]
 agent position
-[-0.01580913]
+[ 2.16774688]
 client position
-[-0.03983401]
+[ 4.05605131]
 agent position
-[-0.95618332]
+[ 3.21618443]
 client position
-[ 0.88611002]
+[ 4.94409847]
 agent position
-[-1.87701318]
+[ 4.31805693]
 client position
-[-0.30111345]
+[ 6.00564221]
 agent position
-[-2.82340278]
+[ 5.27342755]
 client position
-[-1.25493543]
+[ 6.9643449]
 agent position
-[-1.67957432]
+[ 6.42950916]
 client position
-[-0.20248907]
+[ 8.00029082]

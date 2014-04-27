@@ -385,9 +385,9 @@ class CoRobot(object):
             #newstate.print_val()
             #print newobs
             #print observation
-            newstate.weight = 0
-            #CIB newstate.weight = normpdf_old(observation[0],newstate.y,self.obs_noise)  
-            #CIB newstate.weight += normpdf_old(observation[1],newstate.x,self.obs_noise)
+            #newstate.weight = 0
+            newstate.weight = normpdf_old(observation[0],newstate.y,self.obs_noise)  
+            newstate.weight += normpdf_old(observation[1],newstate.x,self.obs_noise)
             #print newstate.weight
             #newstate.weight += normpdf_old(observation[6:],newstate.fc,self.id_obs_noise)
 
@@ -923,23 +923,20 @@ while numiterations<0 or iteration<numiterations:
         data = [['client position'], [trueClientLocations[-1]]]
         a.writerows(data)
 
-    
-    if abs(trueAgentLocations[-1]-trueClientLocations[-1]) < 1.0:
-        if trueAgentLocations[-1] >= trueGoal or trueClientLocations[-1] >= trueGoal:
-            with open(outputfile, 'a') as fp:
-                a = csv.writer(fp, delimiter=',')
-                data = [['failed manipulation', iteration]]
-                a.writerows(data)
-            break
-        elif trueAgentLocations[-1] <= -1.0*trueGoal or trueClientLocations[-1] <= -1.0*trueGoal:
-            with open(outputfile, 'a') as fp:
-                a = csv.writer(fp, delimiter=',')
-                data = [['success manipulation', iteration]]
-                a.writerows(data)
-            break
-    else:
-        if iteration ==50:
-            break
+    if trueAgentLocations[-1] >= trueGoal or trueClientLocations[-1] >= trueGoal:
+        with open(outputfile, 'a') as fp:
+            a = csv.writer(fp, delimiter=',')
+            data = [['failed manipulation', iteration]]
+            a.writerows(data)
+        break
+    elif trueAgentLocations[-1] <= -1.0*trueGoal or trueClientLocations[-1] <= -1.0*trueGoal:
+        with open(outputfile, 'a') as fp:
+            a = csv.writer(fp, delimiter=',')
+            data = [['success manipulation', iteration]]
+            a.writerows(data)
+        break
+    if iteration ==50:
+        break
     iteration=iteration+1
 
 #print "final reward obtained (in ",iteration," iterations): ",totalreward
