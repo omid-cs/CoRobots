@@ -195,7 +195,7 @@ class CoRobot(object):
         #this is the absolute (unsigned) amount of distance to move/moved predicted by the oracle
         #was 0.678 this is totally arbitrary if it is not zero
         #CIB self.oracleMeanValue=0.0
-        self.oracleMeanValue = 0.4
+        self.oracleMeanValue = 1
         #oracleMean is the signed amount
         self.oracleMean=self.oracleMeanValue
         if self.identity[0] < 0:
@@ -205,7 +205,7 @@ class CoRobot(object):
 
         #the absolute amount that the client is predicted to move by each frame
         #CIB self.clientMovePrediction = 0.678
-        self.clientMovePrediction = 0.4
+        self.clientMovePrediction = 1
 
         self.initialise()
         self.POMCP_initialise()
@@ -481,7 +481,8 @@ class CoRobot(object):
                 if pa > 0.5:
                     a = NP.append(yact,NP.random.normal(self.predictBehaviour(state),self.oracleSigmaBeh))
                 else:   # if agent is less powerful
-                    a = NP.append(yact,NP.random.normal(self.predictManipulativeBehaviour(state),self.oracleSigmaBeh))
+                    #a = NP.append(yact,NP.random.normal(self.predictManipulativeBehaviour(state),self.oracleSigmaBeh))
+                    a = NP.append(yact,NP.random.normal(self.predictBehaviour(state),self.oracleSigmaBeh))
         else:
             a = NP.append(yact,NP.array([0.0,0.0,0.0]))
 
@@ -603,10 +604,10 @@ trueGoal = 10.0
 trueRewSigma = 2.5
 
 #CIB obsres = 2.0
-obsres = 2
+obsres = 2.5
 
 #CIB actres = 1.0
-actres = 2
+actres = 2.5
 
 #numcact = 25
 numcact = 1        #CIB
@@ -619,13 +620,13 @@ pomcptimeout=20  #CIB
 agent_pomcptimeout=100 #CIB
 
 #CIB osig=1
-osig=1
+osig=0.1
 
 #CIB osigbeh=0.5
 osigbeh=0.1
 #default is that we have the same osigbeh, but a manipulative agent will have a higher value - also should correpondingly increase the pomcp numcact and the pomcp timeout (see above)
 #CIB agent_osigbeh=1.0  
-agent_osigbeh=0.5
+agent_osigbeh=1.5
 
 #cbehnoise=1
 cbehnoise=0.1  #same as osigbeh by default - this used to be 0.1 but now I think it should be the same as osigbeh
@@ -666,7 +667,7 @@ print "num iterations: ",numiterations
 print "random ids?: ",randomids
     
 if flag==1:
-    outputfile = "manipulation_pomcptimeout"+str(runIndex)+"-"+str(pomcptimeout)+".csv"
+    outputfile = "manipulation_pomcptimeout"+str(runIndex)+"-"+str(agent_pomcptimeout)+".csv"
 else:
     outputfile = "manipulation_numcact"+str(runIndex)+"-"+str(agent_numcact)+".csv"
 
@@ -679,8 +680,8 @@ else:
 
 trueClientId = [2.0,2.0,2.0]
 trueAgentId = [-2.0,2.0-epsilon,2.0-epsilon]
-initClientId_forAgent = 0.5*NP.array(trueClientId+trueAgentId)
-initAgentId_forClient = 0.5*NP.array(trueClientId+trueAgentId)
+initClientId_forAgent = 0.5*(NP.array(trueClientId)+NP.array(trueAgentId))
+initAgentId_forClient = 0.5*(NP.array(trueClientId)+NP.array(trueAgentId))
 
 if randomids:
     trueClientId = NP.random.normal(0,2.0,3)
